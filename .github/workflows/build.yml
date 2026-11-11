@@ -1,9 +1,10 @@
 name: Build
-# Tag pushes are handled by release.yml, so they are excluded here to avoid
-# building every release twice.
+# Note: defining only tags-ignore would also stop branch pushes (see the
+# on.push filter rules), so branches are listed explicitly. Tag pushes are
+# handled by release.yml instead, to avoid building every release twice.
 on:
   push:
-    tags-ignore:
+    branches:
       - '**'
   pull_request:
 
