@@ -1,0 +1,14 @@
+name: Build
+on: [push, pull_request]
+
+jobs:
+  lk2nd:
+    uses: ./.github/workflows/lk2nd-matrix.yml
+    with:
+      project: lk2nd
+      artifacts: |
+        build-*/lk.bin
+        build-*/lk2nd.img
+
+  stock:
+    uses: ./.github/workflows/stock-matrix.yml

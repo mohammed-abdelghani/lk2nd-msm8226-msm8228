@@ -1,0 +1,1 @@
+../msm8226/rules.mk

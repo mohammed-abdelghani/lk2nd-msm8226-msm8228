@@ -1,0 +1,17 @@
+name: Build stock matrix
+on:
+  workflow_call:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - msm8226
+          - msm8228
+
+    uses: ./.github/workflows/stock.yml
+    with:
+      platform: ${{ matrix.platform }}
+      options: ${{ matrix.options }}

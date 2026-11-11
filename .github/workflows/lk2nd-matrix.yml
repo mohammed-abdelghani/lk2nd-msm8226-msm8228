@@ -1,0 +1,25 @@
+name: Build lk2nd matrix
+on:
+  workflow_call:
+    inputs:
+      project:
+        type: string
+        required: true
+      artifacts:
+        type: string
+        required: true
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - msm8226
+          - msm8228
+
+    uses: ./.github/workflows/lk2nd.yml
+    with:
+      project: ${{ inputs.project }}
+      platform: ${{ matrix.platform }}
+      artifacts: ${{ inputs.artifacts }}

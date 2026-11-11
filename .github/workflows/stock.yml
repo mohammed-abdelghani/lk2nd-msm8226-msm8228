@@ -1,0 +1,31 @@
+name: Build stock
+on:
+  workflow_call:
+    inputs:
+      platform:
+        type: string
+        required: true
+      options:
+        type: string
+
+jobs:
+  build:
+    name: ${{ inputs.platform }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install cross compiler
+        uses: carlosperate/arm-none-eabi-gcc-action@v1
+        with:
+          # Qualcomm recommends building with really old GCC versions :/
+          release: 4.8-2014-q3
+      - run: arm-none-eabi-gcc --version
+      - uses: actions/checkout@v7
+      - name: Build (default)
+        run: git clean -dxf && make -j$(nproc) TOOLCHAIN_PREFIX=arm-none-eabi-
+             ${{ inputs.options }} ${{ inputs.platform }}
+      - name: Build (signed kernel)
+        run: git clean -dxf && make -j$(nproc) TOOLCHAIN_PREFIX=arm-none-eabi-
+             ${{ inputs.options }} ${{ inputs.platform }}
+             USER_BUILD_VARIANT=true SIGNED_KERNEL=1
+    env:
+      LKLE_CFLAGS: -Werror

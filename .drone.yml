@@ -1,0 +1,57 @@
+---
+kind: pipeline
+type: docker
+name: msm8226
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: lk2nd (gcc12)
+    image: alpine:3.17
+    commands: [./.drone.sh lk2nd-msm8226]
+
+  - name: default (gcc4)
+    image: alpine:3.17
+    commands: [./.drone.sh msm8226]
+
+  - name: no openssl (gcc12)
+    image: alpine:3.17
+    commands: [./.drone.sh msm8226 CRYPTO_SW_BACKEND=none]
+
+  - name: signed kernel (gcc4)
+    image: alpine:3.17
+    commands: [./.drone.sh msm8226 USER_BUILD_VARIANT=true SIGNED_KERNEL=1]
+
+environment:
+  LKLE_CFLAGS: -Werror
+
+---
+kind: pipeline
+type: docker
+name: msm8228
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+  - name: lk2nd (gcc12)
+    image: alpine:3.17
+    commands: [./.drone.sh lk2nd-msm8228]
+
+  - name: default (gcc4)
+    image: alpine:3.17
+    commands: [./.drone.sh msm8228]
+
+  - name: no openssl (gcc12)
+    image: alpine:3.17
+    commands: [./.drone.sh msm8228 CRYPTO_SW_BACKEND=none]
+
+  - name: signed kernel (gcc4)
+    image: alpine:3.17
+    commands: [./.drone.sh msm8228 USER_BUILD_VARIANT=true SIGNED_KERNEL=1]
+
+environment:
+  LKLE_CFLAGS: -Werror

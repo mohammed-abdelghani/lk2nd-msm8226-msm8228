@@ -1,0 +1,16 @@
+// SPDX-License-Identifier: BSD-3-Clause
+
+#include <skeleton64.dtsi>
+#include <lk2nd.dtsi>
+
+/ {
+	qcom,msm-id = <QCOM_ID_MSM8228 0>;
+};
+
+&lk2nd {
+	n7502 {
+		model = "Samsung Galaxy Note 3 Neo Duos (SM-N7502)";
+		compatible = "samsung,n7502";
+		lk2nd,match-bootloader = "N7502*";
+	};
+};
