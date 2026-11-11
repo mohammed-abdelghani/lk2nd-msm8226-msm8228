@@ -16,8 +16,12 @@ jobs:
       - name: Install cross compiler
         uses: carlosperate/arm-none-eabi-gcc-action@v1
         with:
-          # Qualcomm recommends building with really old GCC versions :/
-          release: 4.8-2014-q3
+          # Qualcomm recommends building with really old GCC versions :/, but the
+          # old 4.8-2014-q3 is only hosted on Launchpad (Canonical), which broke
+          # every stock job during the 2026-11-11 Canonical outage
+          # (actions/runner-images#15296). Use the current upstream release
+          # instead: it comes from gitlab.arm.com and the action caches it.
+          release: 15.3.Rel2
       - run: arm-none-eabi-gcc --version
       - uses: actions/checkout@v7
       - name: Build (default)

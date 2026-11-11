@@ -14,4 +14,3 @@ jobs:
     uses: ./.github/workflows/stock.yml
     with:
       platform: ${{ matrix.platform }}
-      options: ${{ matrix.options }}
