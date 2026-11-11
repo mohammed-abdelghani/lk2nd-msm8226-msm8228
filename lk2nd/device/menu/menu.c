@@ -252,6 +252,8 @@ static void display_device_info(void)
 	wait_key();
 }
 
+/* Defined here, called from app/aboot/aboot.c */
+void display_fastboot_menu(void);
 void display_fastboot_menu(void)
 {
 	struct fbcon_config *fb = fbcon_display();

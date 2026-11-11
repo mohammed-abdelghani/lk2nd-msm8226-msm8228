@@ -34,6 +34,26 @@ typedef struct device_info device_info;
 
 #define DEVICE_MAGIC "ANDROID-BOOT!"
 #define DEVICE_MAGIC_SIZE 13
+
+/*
+ * GCC 15 warns (-Werror=unterminated-string-initialization) when a string
+ * initializer fills a fixed-size array that has no room for its NUL
+ * terminator. `magic` is exactly DEVICE_MAGIC_SIZE bytes on purpose: it is
+ * compared and copied with memcmp()/memcpy() and its size is part of the
+ * on-flash layout, so the missing terminator is intentional.
+ *
+ * Only use the attribute when the compiler advertises it: older toolchains
+ * (e.g. the GCC 4.8 used by the Drone stock builds) do not know it and would
+ * reject it under -Werror.
+ */
+#ifndef __has_attribute
+#define __has_attribute(x) 0
+#endif
+#if __has_attribute(nonstring)
+#define DEVINFO_MAGIC_ATTR __attribute__((nonstring))
+#else
+#define DEVINFO_MAGIC_ATTR
+#endif
 #define MAX_PANEL_ID_LEN 64
 #define MAX_VERSION_LEN  64
 #define MAX_VB_PARTITIONS 32
@@ -47,7 +67,7 @@ enum unlock_type {
 
 struct device_info
 {
-	unsigned char magic[DEVICE_MAGIC_SIZE];
+	unsigned char magic[DEVICE_MAGIC_SIZE] DEVINFO_MAGIC_ATTR;
 	bool is_unlocked;
 	bool is_tampered;
 	bool is_unlock_critical;
