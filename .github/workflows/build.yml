@@ -1,5 +1,11 @@
 name: Build
-on: [push, pull_request]
+# Tag pushes are handled by release.yml, so they are excluded here to avoid
+# building every release twice.
+on:
+  push:
+    tags-ignore:
+      - '**'
+  pull_request:
 
 jobs:
   lk2nd:

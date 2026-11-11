@@ -28,6 +28,15 @@ jobs:
       # runner image.
       - name: Build dtc and libfdt from source (no apt)
         run: |
+          # flex/bison ship with the runner image. If a future image drops
+          # them, fall back to apt instead of dying on an obscure make error -
+          # this is the only remaining apt dependency, and only as a last
+          # resort, so a Canonical outage still cannot break the normal path.
+          if ! command -v flex >/dev/null 2>&1 || ! command -v bison >/dev/null 2>&1; then
+            echo "::warning::flex/bison missing from the runner image, installing with apt"
+            sudo apt-get update -qq
+            sudo apt-get install -yqq flex bison
+          fi
           git clone --depth 1 --branch v1.8.1 https://github.com/dgibson/dtc.git "$RUNNER_TEMP/dtc-src"
           make -C "$RUNNER_TEMP/dtc-src" -j"$(nproc)" PREFIX="$HOME/.local" install
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"

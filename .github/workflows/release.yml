@@ -1,0 +1,56 @@
+name: Release
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    uses: ./.github/workflows/lk2nd-matrix.yml
+    with:
+      project: lk2nd
+      artifacts: |
+        build-*/lk.bin
+        build-*/lk2nd.img
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v7
+        with:
+          name: lk2nd-msm8226
+          path: artifacts/msm8226
+      - uses: actions/download-artifact@v7
+        with:
+          name: lk2nd-msm8228
+          path: artifacts/msm8228
+
+      # Same layout as upstream releases: one .img per platform + a hashsum file.
+      - name: Pack release assets
+        run: |
+          mkdir -p dist
+          for platform in msm8226 msm8228; do
+            cp "artifacts/$platform/lk2nd.img" "dist/lk2nd-$platform.img"
+          done
+          (cd dist && sha256sum -- * > sha256sums.txt)
+          ls -l dist
+          cat dist/sha256sums.txt
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release $GITHUB_REF_NAME already exists, refreshing assets"
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber --repo "$GITHUB_REPOSITORY"
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* \
+              --title "lk2nd $GITHUB_REF_NAME" \
+              --generate-notes \
+              --repo "$GITHUB_REPOSITORY"
+          fi
