@@ -31,11 +31,19 @@ jobs:
           path: artifacts/msm8228
 
       # Same layout as upstream releases: one .img per platform + a hashsum file.
+      # The artifacts keep their build-*/ prefix, so locate the image instead
+      # of hardcoding the path.
       - name: Pack release assets
         run: |
           mkdir -p dist
           for platform in msm8226 msm8228; do
-            cp "artifacts/$platform/lk2nd.img" "dist/lk2nd-$platform.img"
+            src=$(find "artifacts/$platform" -type f -name 'lk2nd.img' -print -quit)
+            if [ -z "$src" ]; then
+              echo "::error::lk2nd.img not found for $platform"
+              exit 1
+            fi
+            echo "packing $src -> dist/lk2nd-$platform.img"
+            cp "$src" "dist/lk2nd-$platform.img"
           done
           (cd dist && sha256sum -- * > sha256sums.txt)
           ls -l dist
