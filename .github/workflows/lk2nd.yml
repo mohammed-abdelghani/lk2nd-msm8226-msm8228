@@ -19,20 +19,21 @@ jobs:
     name: ${{ inputs.platform }}
     runs-on: ubuntu-latest
     steps:
-      # lk2nd needs dtc to compile its device trees (lk1st without a device tree
-      # does not). Build it from source on GitHub instead of
-      # `apt-get install device-tree-compiler`: Ubuntu mirrors live on Canonical
-      # infrastructure, and the Canonical outage of 2026-11-11
-      # (actions/runner-images#15296) took down every apt-based job for hours.
-      # flex, bison, make and gcc ship with the runner image.
-      - name: Build dtc from source (no apt)
+      # lk2nd needs the dtc binary (device trees) and libfdt, which
+      # lk2nd/scripts/dtbTool loads at runtime through ctypes. Build both from
+      # source on GitHub instead of `apt-get install device-tree-compiler`:
+      # Ubuntu mirrors live on Canonical infrastructure, and the Canonical
+      # outage of 2026-11-11 (actions/runner-images#15296) took down every
+      # apt-based job for hours. flex, bison, make and gcc ship with the
+      # runner image.
+      - name: Build dtc and libfdt from source (no apt)
         run: |
           git clone --depth 1 --branch v1.8.1 https://github.com/dgibson/dtc.git "$RUNNER_TEMP/dtc-src"
-          make -C "$RUNNER_TEMP/dtc-src" -j"$(nproc)" dtc
-          mkdir -p "$HOME/.local/bin"
-          install -m755 "$RUNNER_TEMP/dtc-src/dtc" "$HOME/.local/bin/dtc"
+          make -C "$RUNNER_TEMP/dtc-src" -j"$(nproc)" PREFIX="$HOME/.local" install
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          echo "LD_LIBRARY_PATH=$HOME/.local/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}" >> "$GITHUB_ENV"
           "$HOME/.local/bin/dtc" --version
+          ls -l "$HOME/.local/lib"/libfdt.so*
         if: inputs.project == 'lk2nd'
       - name: Install cross compiler
         uses: carlosperate/arm-none-eabi-gcc-action@v1
